@@ -4,29 +4,42 @@ import 'izitoast/dist/css/iziToast.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
+// import renderGallery from './js/render-functions';
+
 const form = document.querySelector('.form');
 const gallery = document.querySelector('.gallery');
-const loader = document.querySelector('.loader');
 
-form.addEventListener('submit', onCreateFormSubmit);
+const showLoader = () => {
+  const loader = document.createElement('span');
+  loader.classList.add('loader');
+  document.body.append(loader);
+};
 
-function onCreateFormSubmit(event) {
+const hideLoader = () => {
+  const loader = document.querySelector('.loader');
+  if (loader) {
+    loader.remove();
+  }
+};
+
+form.addEventListener('submit', event => {
+  showLoader();
   event.preventDefault();
   const nameImage = event.target.elements.query.value;
-
   if (nameImage.trim() === '') {
-    return iziToast.error({
+    iziToast.error({
       message: 'Please enter a search query.',
       position: 'topRight',
     });
+    hideLoader();
+  } else {
+    gallery.innerHTML = '';
+    fetchImages(nameImage);
+    event.target.reset();
   }
+});
 
-  loader.style.display = 'inline-block';
-
-  fetchImages(nameImage);
-  event.target.reset();
-}
-
+// ======= pixabay функція відправленя на бек запиту, отримання  та обробки відповіді
 function fetchImages(nameImage) {
   const BASE_URL = 'https://pixabay.com/api/';
   const searchParams = new URLSearchParams({
@@ -37,6 +50,7 @@ function fetchImages(nameImage) {
     safesearch: 'true',
   });
   const url = `${BASE_URL}?${searchParams}`;
+  hideLoader();
 
   return fetch(url)
     .then(response => {
@@ -46,6 +60,7 @@ function fetchImages(nameImage) {
       return response.json();
     })
     .then(data => {
+      hideLoader();
       if (data.hits.length === 0) {
         iziToast.error({
           backgroundColor: '#EF4040',
@@ -55,50 +70,35 @@ function fetchImages(nameImage) {
             'Sorry, there are no images matching your search query. Please try again!',
         });
       } else {
-        renderTicker(data);
+        renderGallery(data);
       }
     })
     .catch(error => {
       console.error('Error:', error);
-    })
-    .finally(() => {
-      loader.style.display = 'none';
+      iziToast
+        .error({
+          // Вивести повідомлення про помилку користувачеві
+          backgroundColor: '#EF4040',
+          position: 'topRight',
+          maxWidth: 500,
+          message: 'Oops! Something went wrong. Please try again later.',
+        })
+        .finally(() => {
+          hideLoader();
+        });
     });
-}
-const options = {
-  captions: true,
-  captionSelector: 'img',
-  captionType: 'attr',
-  captionsData: 'alt',
-  captionPosition: 'bottom',
-  animation: 250,
-  widthRatio: 0.8,
-  scaleImageToRatio: true,
-};
-function renderTicker(data) {
-  const markup = data.hits.map(templateImage).join('');
-  gallery.innerHTML = markup;
 
-  const galleryLinks = document.querySelectorAll('.gallery-link');
-  galleryLinks.forEach(link => {
-    link.setAttribute('href', link.querySelector('img').getAttribute('src'));
-  });
-
-  const lightbox = new SimpleLightbox('.gallery a', options);
-
-  lightbox.refresh();
-}
-
-function templateImage({
-  largeImageURL,
-  webformatURL,
-  tags,
-  likes,
-  views,
-  comments,
-  downloads,
-}) {
-  return `<li class="gallery-item" >
+  // ============ функція повертає розмітку галереї +++++
+  function templateImage({
+    largeImageURL,
+    webformatURL,
+    tags,
+    likes,
+    views,
+    comments,
+    downloads,
+  }) {
+    return `<li class="gallery-item" >
     <a class="gallery-link" href="${largeImageURL}">
       <img
         class="gallery-image"
@@ -113,4 +113,29 @@ function templateImage({
     <p><strong>Downloads:</strong> ${downloads}</p>
     </div>
   </li>`;
+  }
+
+  // ===========render-function відображення зображень у галереї, отриманих від сервера
+  function renderGallery(data) {
+    const markup = data.hits.map(templateImage).join('');
+    gallery.innerHTML = markup;
+
+    const galleryLinks = document.querySelectorAll('.gallery-link');
+    galleryLinks.forEach(link => {
+      link.setAttribute('href', link.querySelector('img').getAttribute('src'));
+    });
+
+    const lightbox = new SimpleLightbox('.gallery a', {
+      captions: true,
+      captionSelector: 'img',
+      captionType: 'attr',
+      captionsData: 'alt',
+      captionPosition: 'bottom',
+      animation: 250,
+      widthRatio: 0.8,
+      scaleImageToRatio: true,
+    });
+
+    lightbox.refresh();
+  }
 }

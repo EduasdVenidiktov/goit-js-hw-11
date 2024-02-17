@@ -46,6 +46,15 @@ form {
   position: relative; /* Додано */
 }
 
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 36px;
+}
+
 input[placeholder='Search images...'] {
   color: #808080;
   padding-left: 16px;
@@ -93,52 +102,6 @@ button[type='submit']::first-line {
   letter-spacing: 0.04em;
 }
 
-.loader {
-  position: absolute;
-  margin-left: 650px;
-  width: 164px;
-  height: 164px;
-  border-radius: 50%;
-  animation: rotate 0.75s linear infinite;
-}
-.loader::before {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 40px;
-  border: 1px solid #4000ff;
-  border-width: 12px 2px 7px;
-  border-radius: 2px 2px 1px 1px;
-  box-sizing: border-box;
-  transform: rotate(45deg) translate(24px, -10px);
-  background-image: linear-gradient(#00ff80 20px, transparent 0),
-    linear-gradient(#c3ff00 30px, transparent 0),
-    linear-gradient(#c8ff00 30px, transparent 0);
-  background-size: 10px 12px, 1px 30px, 1px 30px;
-  background-repeat: no-repeat;
-  background-position: center, 12px 0px, 3px 0px;
-}
-.loader::after {
-  content: '';
-  position: absolute;
-  height: 4px;
-  width: 4px;
-  left: 20px;
-  top: 47px;
-  border-radius: 50%;
-  color: #fff;
-  box-shadow: -4px 7px 2px, -7px 16px 3px 1px, -11px 24px 4px 1px,
-    -6px 24px 4px 1px, -14px 35px 6px 2px, -5px 36px 8px 2px, -5px 45px 8px 2px,
-    -14px 49px 8px 2px, 6px 60px 11px 1px, -11px 66px 11px 1px, 11px 75px 13px,
-    -1px 82px 15px;
-}
-
-@keyframes rotate {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .gallery {
   text-align: center;
   display: flex;
@@ -177,4 +140,30 @@ button[type='submit']::first-line {
 .item-text li {
   font-weight: 400;
   color: #2e2f42;
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #4e75ff;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  position: absolute; /* позиціонування відносно батьківського елемента */
+  top: 20%; /* верхня границя відносно батьківського елемента */
+  left: 48%; /* ліва границя відносно батьківського елемента */
+  transform: translate(-50%, -50%); /* зсув на 50% від ширини та висоти */
+  animation: rotation 1s linear infinite;
+
+  animation-fill-mode: forwards; /* зберігає останню фрейм анімації */
+  opacity: 1; /* початкове значення прозорості */
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0; /* приховати лоудер після завершення анімації */
+  }
 }
