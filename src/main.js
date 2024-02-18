@@ -1,141 +1,97 @@
+import { fetchImages } from './js/pixabay-api';
+import { templateImages } from './js/render-functions';
+
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
-// import renderGallery from './js/render-functions';
-
-const form = document.querySelector('.form');
-const gallery = document.querySelector('.gallery');
-
-const showLoader = () => {
-  const loader = document.createElement('span');
-  loader.classList.add('loader');
-  document.body.append(loader);
+const refs = {
+  formEl: document.querySelector('.form'),
+  loadEl: document.querySelector('.loader'),
+  GalleryEl: document.querySelector('.gallery'),
 };
 
-const hideLoader = () => {
-  const loader = document.querySelector('.loader');
-  if (loader) {
-    loader.remove();
-  }
-};
+refs.formEl.addEventListener('submit', onFormSabmit);
 
-form.addEventListener('submit', event => {
+function onFormSabmit(e) {
+  e.preventDefault();
+
   showLoader();
-  event.preventDefault();
-  const nameImage = event.target.elements.query.value;
-  if (nameImage.trim() === '') {
-    iziToast.error({
-      message: 'Please enter a search query.',
-      position: 'topRight',
-    });
+
+  const query = e.target.elements.query.value.trim(); //діставання значення input без пробілів
+  if (!query) {
+    showError();
     hideLoader();
-  } else {
-    gallery.innerHTML = '';
-    fetchImages(nameImage);
-    event.target.reset();
+    return;
   }
-});
 
-// ======= pixabay функція відправленя на бек запиту, отримання  та обробки відповіді
-function fetchImages(nameImage) {
-  const BASE_URL = 'https://pixabay.com/api/';
-  const searchParams = new URLSearchParams({
-    key: '42263617-81d7156b9f7b88cd7b1016c2a',
-    q: nameImage,
-    image_type: 'photo',
-    orientation: 'horizontal',
-    safesearch: 'true',
-  });
-  const url = `${BASE_URL}?${searchParams}`;
-  hideLoader();
-
-  return fetch(url)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
+  fetchImages(query)
     .then(data => {
+      showLoader();
+
       hideLoader();
       if (data.hits.length === 0) {
-        iziToast.error({
-          backgroundColor: '#EF4040',
-          position: 'topRight',
-          maxWidth: 500,
-          message:
-            'Sorry, there are no images matching your search query. Please try again!',
-        });
+        showErrorMessenge();
+        hideLoader();
       } else {
-        renderGallery(data);
+        refs.GalleryEl.innerHTML = ''; //скидання розмітки після submit, але до рендеру
+        renderHits(data.hits);
       }
     })
     .catch(error => {
-      console.error('Error:', error);
-      iziToast
-        .error({
-          // Вивести повідомлення про помилку користувачеві
-          backgroundColor: '#EF4040',
-          position: 'topRight',
-          maxWidth: 500,
-          message: 'Oops! Something went wrong. Please try again later.',
-        })
-        .finally(() => {
-          hideLoader();
-        });
+      showLoader();
+
+      showError(error);
+      hideLoader();
+
+      refs.GalleryEl.innerHTML = ''; //скидання розмітки після
+    })
+
+    .finally(() => {
+      e.target.reset(); //очистка форми
     });
-
-  // ============ функція повертає розмітку галереї +++++
-  function templateImage({
-    largeImageURL,
-    webformatURL,
-    tags,
-    likes,
-    views,
-    comments,
-    downloads,
-  }) {
-    return `<li class="gallery-item" >
-    <a class="gallery-link" href="${largeImageURL}">
-      <img
-        class="gallery-image"
-        src="${webformatURL}"
-        alt="${tags}"
-      />
-    </a>
-    <div class="item-text">
-    <p><strong>Likes:</strong> ${likes}</p>
-    <p><strong>Views:</strong> ${views}</p>
-    <p><strong>Comments:</strong> ${comments}</p>
-    <p><strong>Downloads:</strong> ${downloads}</p>
-    </div>
-  </li>`;
-  }
-
-  // ===========render-function відображення зображень у галереї, отриманих від сервера
-  function renderGallery(data) {
-    const markup = data.hits.map(templateImage).join('');
-    gallery.innerHTML = markup;
-
-    const galleryLinks = document.querySelectorAll('.gallery-link');
-    galleryLinks.forEach(link => {
-      link.setAttribute('href', link.querySelector('img').getAttribute('src'));
-    });
-
-    const lightbox = new SimpleLightbox('.gallery a', {
-      captions: true,
-      captionSelector: 'img',
-      captionType: 'attr',
-      captionsData: 'alt',
-      captionPosition: 'bottom',
-      animation: 250,
-      widthRatio: 0.8,
-      scaleImageToRatio: true,
-    });
-
-    lightbox.refresh();
-  }
 }
+// =====================================================================
+function renderHits(hits) {
+  const markup = templateImages(hits);
+  refs.GalleryEl.insertAdjacentHTML('beforeend', markup); // додає нову розмітку
+
+  const lightbox = new SimpleLightbox('.gallery a', {
+    captions: true,
+    captionSelector: 'img',
+    captionType: 'attr',
+    captionsData: 'alt',
+    captionPosition: 'bottom',
+    animation: 250,
+    widthRatio: 0.8,
+    scaleImageToRatio: true,
+  });
+
+  lightbox.refresh();
+}
+
+function showError() {
+  iziToast.error({
+    message: 'Please enter a search query.',
+    position: 'topRight',
+  });
+}
+function showErrorMessenge() {
+  iziToast.error({
+    backgroundColor: '#EF4040',
+    position: 'topRight',
+    maxWidth: 500,
+    message:
+      'Sorry, there are no images matching your search query. Please try again!',
+  });
+}
+
+const showLoader = () => {
+  refs.loadEl.classList.remove('hidden');
+};
+
+const hideLoader = () => {
+  refs.loadEl.classList.add('hidden');
+};

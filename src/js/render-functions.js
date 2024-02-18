@@ -1,22 +1,31 @@
-export default function renderGallery(data) {
-  const markup = data.hits.map(templateImage).join('');
-  gallery.innerHTML = markup;
+export function templateImage(hit) {
+  const {
+    largeImageURL,
+    webformatURL,
+    tags,
+    likes,
+    views,
+    comments,
+    downloads,
+  } = hit;
 
-  const galleryLinks = document.querySelectorAll('.gallery-link');
-  galleryLinks.forEach(link => {
-    link.setAttribute('href', link.querySelector('img').getAttribute('src'));
-  });
+  return `<li class="gallery-item" >
+    <a class="gallery-link" href="${largeImageURL}">
+      <img
+        class="gallery-image"
+        src="${webformatURL}"
+        alt="${tags}"
+      />
+    </a>
+    <div class="item-text">
+    <p><strong>Likes:</strong> ${likes}</p>
+    <p><strong>Views:</strong> ${views}</p>
+    <p><strong>Comments:</strong> ${comments}</p>
+    <p><strong>Downloads:</strong> ${downloads}</p>
+    </div>
+  </li>`;
+}
 
-  const lightbox = new SimpleLightbox('.gallery a', {
-    captions: true,
-    captionSelector: 'img',
-    captionType: 'attr',
-    captionsData: 'alt',
-    captionPosition: 'bottom',
-    animation: 250,
-    widthRatio: 0.8,
-    scaleImageToRatio: true,
-  });
-
-  lightbox.refresh();
+export function templateImages(hits) {
+  return hits.map(templateImage).join('');
 }

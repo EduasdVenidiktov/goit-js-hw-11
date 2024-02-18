@@ -19,14 +19,14 @@
           name="query"
           placeholder="Search images..."
         />
-        <button type="submit" class="button">Search</button>
+        <button type="submit" class="button">
+          Search <span class="loader hidden"></span>
+        </button>
       </form>
-
-      <div class="gallery">
-        <a href="#"><img src="#" alt="" title="Image" /></a>
-        <a href="#"><img src="#" alt="" title="Beautiful Image" /></a>
-      </div>
+      <span class="loader hidden"></span>
+      <ul class="gallery"></ul>
     </div>
+
     <script src="./main.js" type="module"></script>
   </body>
 </html>

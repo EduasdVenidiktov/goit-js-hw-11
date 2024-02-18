@@ -41,9 +41,10 @@ button {
 }
 
 form {
-  margin: 40px auto;
+  margin: 20px auto;
+
   text-align: center;
-  position: relative; /* Додано */
+  position: relative;
 }
 
 .container {
@@ -142,20 +143,20 @@ button[type='submit']::first-line {
   color: #2e2f42;
 }
 
-.loader {
-  width: 48px;
-  height: 48px;
-  border: 5px solid #4e75ff;
-  border-bottom-color: transparent;
-  border-radius: 50%;
-  position: absolute; /* позиціонування відносно батьківського елемента */
-  top: 20%; /* верхня границя відносно батьківського елемента */
-  left: 48%; /* ліва границя відносно батьківського елемента */
-  transform: translate(-50%, -50%); /* зсув на 50% від ширини та висоти */
-  animation: rotation 1s linear infinite;
+.hidden {
+  display: none;
+  opacity: 0;
+}
 
-  animation-fill-mode: forwards; /* зберігає останню фрейм анімації */
-  opacity: 1; /* початкове значення прозорості */
+.loader {
+  width: 16px;
+  height: 16px;
+  border: 2px dotted #ddf502;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
 }
 
 @keyframes rotation {
@@ -164,6 +165,5 @@ button[type='submit']::first-line {
   }
   100% {
     transform: rotate(360deg);
-    opacity: 0; /* приховати лоудер після завершення анімації */
   }
 }
