@@ -13,9 +13,9 @@ const refs = {
   GalleryEl: document.querySelector('.gallery'),
 };
 
-refs.formEl.addEventListener('submit', onFormSabmit);
+refs.formEl.addEventListener('submit', onFormSubmit);
 
-function onFormSabmit(e) {
+function onFormSubmit(e) {
   e.preventDefault();
 
   showLoader();
